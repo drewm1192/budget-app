@@ -8,8 +8,29 @@ own scope and keeps data private.
 */
 var budgetController = (function(){
 
-    //Some code
-    
+    var Expense = function(id, description, value){
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    };
+
+    var Income = function(id, description, value){
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    };
+
+    var data = {
+        allItems: {
+            exp: [],
+            inc: [],
+        },
+        totals: {
+            exp: 0,
+            inc: 0
+        }
+    }
+
 //The parentheses here () automatically invoke the function.
 })();
 
@@ -92,7 +113,7 @@ var UIController = (function(){
     
     return{
         init: function(){
-            console.log("APP HAS STARTED");
+            console.log("Application has started.");
             setupEventListeners();
         }
     }
