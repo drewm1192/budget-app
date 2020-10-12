@@ -1,4 +1,6 @@
 
+
+
 /*
 BUDGET CONTROLLER
 We use an IIFE  for data security. Data within here lies in its
@@ -17,6 +19,28 @@ var budgetController = (function(){
  */
 var UIController = (function(){
 
+    var DOMstrings = {
+        inputType: ".add__type",
+        inputDescription: ".add__description",
+        inputValue: ".add__value",
+        inputButton: ".add__btn",
+    }
+
+    return {
+        getInput: function(){
+            return {
+            //returns the html value field (inc or exp)
+            type: document.querySelector(DOMstrings.inputType).value,
+            description: document.querySelector(DOMstrings.inputDescription).value,
+            value: document.querySelector(DOMstrings.inputValue).value
+            }
+
+        },
+
+        getDOMstrings: function(){
+            return DOMstrings;
+        }
+    }
 
 
 })();
@@ -29,18 +53,21 @@ var UIController = (function(){
 
  var controller = (function(budgetCtrl,UICtrl){
     
+    var DOM = UICtrl.getDOMstrings();
+
     var ctrlAddItem = function(){
 
         //1. Get the field input data
+        var input = UICtrl.getInput();
         //2. Add item to the budget controller
         //3. Add the item to the user interface
         //4. Calculate the overall budget
         //5. Display the overall budget.
-        console.log("TEST");
+        console.log(input);
     };
     
     //Controls the action that occurs when someone clicks the checkmark button
-    document.querySelector(".add__btn").addEventListener("click",ctrlAddItem);
+    document.querySelector(DOM.inputButton).addEventListener("click",ctrlAddItem);
 
     /**
      * We then add an event listener for when someone hits the return
@@ -58,6 +85,8 @@ var UIController = (function(){
         }
 
     });
+
+
 
 
  })(budgetController,UIController);
