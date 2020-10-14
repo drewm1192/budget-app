@@ -31,6 +31,34 @@ var budgetController = (function(){
         }
     }
 
+    return {
+        addItem: function(type, des, value){
+            //Instantiate new items
+            var newItem, ID;
+            //Create new ID by getting the last element's ID and adding 1
+            if(data.allItems[type].length > 0){
+                ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
+            }else{
+                ID = 0;
+            }
+            //Create new item based on inc or exp type
+            if(type === "exp"){
+                newItem = new Expense(ID, des, value);
+            }
+            else if(type === "inc"){
+                newItem = new Income(ID, des, value)
+            }
+            //Add it to the data structure.
+            data.allItems[type].push(newItem);
+            //Return the new item.
+            return newItem;
+        },
+
+        testing: function(){
+            console.log(data);
+        }
+    }
+
 //The parentheses here () automatically invoke the function.
 })();
 
@@ -45,6 +73,8 @@ var UIController = (function(){
         inputDescription: ".add__description",
         inputValue: ".add__value",
         inputButton: ".add__btn",
+        incomeContainer: ".income__list",
+        expenseContainer: ".expenses__list"
     }
 
     return {
@@ -55,6 +85,54 @@ var UIController = (function(){
             description: document.querySelector(DOMstrings.inputDescription).value,
             value: document.querySelector(DOMstrings.inputValue).value
             }
+
+        },
+
+        //Adds elements to the page.
+        addListItem: function(obj, type){
+            //Instantiate variables
+            var html, newHtml, element;
+            //Create HTML string with placeholder text
+            if(type === "inc"){
+                element = DOMstrings.incomeContainer;
+                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+            }else if(type === "exp"){
+                element = DOMstrings.expenseContainer;
+                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+            }
+            //Replace the placeholder text with some actual data
+            newHtml = html.replace("%id%",obj.id);
+            newHtml = newHtml.replace("%description%",obj.description);
+            newHtml = newHtml.replace("%value%",obj.value);
+            console.log(newHtml);
+            //Insert the HTML into the DOM
+            document.querySelector(element).insertAdjacentHTML("beforeend",newHtml);
+        },
+
+        //This function clears out the fields on the UI.
+        clearFields: function(){
+            var fields, fieldsArray;
+            //To select all, you need a comma between the items.
+            fields = document.querySelectorAll(DOMstrings.inputDescription + ", " + DOMstrings.inputValue);
+            //Fields is a list which we will convert to an array and loop over.
+            /**
+             * Lists can be converted to an array if we call the array prototype,
+             * access the slice() method for arrays, and use it on our list. 
+             * Once we get the slice function out, we add "call".
+             */
+            fieldsArray = Array.prototype.slice.call(fields);
+            //Now we use a for each loop. We just use "forEach" and give it a 
+            //callback function to apply to each item in the array. This function
+            //can receive up to 3 arguments: the current item, the index, and the
+            //entire array. Can take any names.
+            fieldsArray.forEach(function(current, index, array){
+                //Simply select the current and set it to empty.
+                current.value = "";
+            });
+            //Make it so that after the fields are cleared, the blue
+            //box focus goes bback to the description field which is 
+            //at index 0.
+            fieldsArray[0].focus();
 
         },
 
@@ -101,14 +179,17 @@ var UIController = (function(){
      * This function manages adding a new item to the page.
      */
     var ctrlAddItem = function(){
-
+        var input, newItem;
         //1. Get the field input data
-        var input = UICtrl.getInput();
+        input = UICtrl.getInput();
         //2. Add item to the budget controller
+        newItem = budgetCtrl.addItem(input.type,input.description,input.value);
         //3. Add the item to the user interface
-        //4. Calculate the overall budget
-        //5. Display the overall budget.
-        console.log(input);
+        UIController.addListItem(newItem, input.type);
+        //4. Clear the fields
+        UIController.clearFields();
+        //5. Calculate the overall budget
+        //6. Display the overall budget.
     };
     
     return{
