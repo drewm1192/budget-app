@@ -66,6 +66,24 @@ var budgetController = (function(){
             return newItem;
         },
 
+        /*
+        /Deletes an item from the DS once the x is clicked.
+        */
+        deleteItem: function(type, id){
+            var ids, index;
+            //Creates a new array of all the elements.
+            ids = data.allItems[type].map(function(cur){
+                return cur.id;
+            });
+            //Returns the index of the inputted element to deleteItem()
+            index = ids.indexOf(id);
+
+            if(index !== -1){
+                //Removes elements from index to just index (1 is num elements)
+                data.allItems[type].splice(index,1);
+            }
+        },
+
         calculateBudget: function(){
           
             //Calculate total income and expenses
@@ -153,6 +171,15 @@ var UIController = (function(){
             document.querySelector(element).insertAdjacentHTML("beforeend",newHtml);
         },
 
+        /**
+         * Deletes an item from the UI.
+         */
+        deleteListItem: function(selectorId){
+            var el = document.getElementById(selectorId);
+            //We have to remove a child, can't remove an element itself in JS
+            el.parentNode.removeChild(el);
+        },
+
         //This function clears out the fields on the UI.
         clearFields: function(){
             var fields, fieldsArray;
@@ -200,7 +227,6 @@ var UIController = (function(){
 
 })();
 
-
 /**
  * GLOBAL APP CONTROLLER
  * App controller. 
@@ -228,9 +254,8 @@ var UIController = (function(){
                 ctrlAddItem();
             }
         });
-
+        //This enables event bubbling
         document.querySelector(DOM.container).addEventListener("click",ctrlDeleteItem);
-
     };
 
     var updateBudget = function(){
@@ -273,21 +298,18 @@ var UIController = (function(){
         //4 parents up.
         itemId = event.target.parentNode.parentNode.parentNode.parentNode.id
         if(itemId){
-
             //Split the id name by the "-"
-            splitID = idemId.split("-");
+            splitID = itemId.split("-");
             type = splitID[0];
-            ID = splitID[1];
-
+            //This is a string so must be cast to int
+            ID = parseInt(splitID[1]);
             //Delete the item from the data structure
-
+            budgetCtrl.deleteItem(type,ID);
             //Delete the item from the user interface
-
+            UICtrl.deleteListItem(itemId);
             //Update and show the new budget
-
+            updateBudget();
         }
-
-
     };
 
     return{
