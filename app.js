@@ -12,6 +12,22 @@ var budgetController = (function(){
         this.id = id;
         this.description = description;
         this.value = value;
+        this.percentage = -1;
+    };
+
+    //Get the percent of income each expense is.
+    Expense.prototype.calcPercentage = function(totalIncome){
+        if(totalIncome > 0){
+            this.percentage = Math.round(this.value/totalIncome * 100);
+        }
+        else{
+            this.percentage = -1;
+        }
+    };
+
+    //Getter for an expense's percentage
+    Expense.prototype.getPercentage = function(){
+        return this.percentage
     };
 
     var Income = function(id, description, value){
@@ -100,6 +116,21 @@ var budgetController = (function(){
             }
         },
 
+        //Calculates the percentage for each expense
+        calculatePercentages: function(){ 
+            data.allItems.exp.forEach(function(cur){
+                cur.calcPercentage(data.totals.inc);
+            });
+        },
+
+        //Gets the array of all expenses and their percentages
+        getPercentages: function(){
+            var allPerc = data.allItems.exp.map(function(cur){
+                return cur.getPercentage();
+            });
+            return allPerc;
+        },
+
         //Getter for the overall budget
         getBudget: function(){
 
@@ -136,7 +167,8 @@ var UIController = (function(){
         incomeLabel: ".budget__income--value",
         expensesLabel: ".budget__expenses--value",
         percentageLabel: ".budget__expenses--percentage",
-        container: ".container"
+        container: ".container",
+        expensesPercentageLabel: ".item__percentage"
     }
 
     return {
@@ -218,6 +250,28 @@ var UIController = (function(){
                 document.querySelector(DOMstrings.percentageLabel).textContent = "---";
             }
         },
+
+        displayPercentages: function(percentages){
+            //This returns a node list. Each element is a node.
+            var fields = document.querySelectorAll(DOMstrings.expensesPercentageLabel);
+            //Now we loop over all of them and change the text property of the percentage field.
+            //Use a nodelistforeach since this is not an array
+            var nodeListForEach = function(list,callBack){
+                for(var i = 0; i < list.length; i++){
+                    callBack(list[i],i);
+                }
+            }
+            //This is the call back.
+            nodeListForEach(fields, function(cur, index){
+                if(percentages[index] > 0){
+                    cur.textContent = percentages[index] + '%';
+                }
+                else{
+                    cur.textContent = "---";
+                }
+            });
+        },
+
         //Getter for the DOMstrings
         getDOMstrings: function(){
             return DOMstrings;
@@ -258,6 +312,17 @@ var UIController = (function(){
         document.querySelector(DOM.container).addEventListener("click",ctrlDeleteItem);
     };
 
+    var updatePercentages = function(){
+
+        //Calculate the percentages
+        budgetCtrl.calculatePercentages();
+        //Read them from budget controller
+        var percentages = budgetCtrl.getPercentages();
+        //Add them to the UI
+        console.log(percentages);
+        UICtrl.displayPercentages(percentages);
+    };
+
     var updateBudget = function(){
         //1. Calculate the budget
         budgetCtrl.calculateBudget();
@@ -286,6 +351,8 @@ var UIController = (function(){
                 UICtrl.clearFields();
                 //5. Calculate and upate budget
                 updateBudget();
+                //6. Calculate and update percentages
+                updatePercentages();
             }
     };
     
@@ -309,6 +376,8 @@ var UIController = (function(){
             UICtrl.deleteListItem(itemId);
             //Update and show the new budget
             updateBudget();
+            //Calculate and update percentages
+            updatePercentages();
         }
     };
 
