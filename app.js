@@ -189,6 +189,12 @@ var UIController = (function(){
         return (type === "exp" ? '-': '+') + ' ' + int + '.' + dec;
     };
 
+    var nodeListForEach = function(list,callBack){
+        for(var i = 0; i < list.length; i++){
+            callBack(list[i],i);
+        }
+    }
+
     return {
         getInput: function(){
             return {
@@ -302,6 +308,18 @@ var UIController = (function(){
             document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ', ' + year;
         },
 
+        changeType: function(){
+            var fields = document.querySelectorAll(
+                DOMstrings.inputType + ',' +
+                DOMstrings.inputDescription + ',' +
+                DOMstrings.inputValue
+            );
+            nodeListForEach(fields,function(cur){
+                cur.classList.toggle('red-focus');
+            })
+            document.querySelector(DOMstrings.inputButton).classList.toggle('red');
+        },
+
         //Getter for the DOMstrings
         getDOMstrings: function(){
             return DOMstrings;
@@ -340,6 +358,8 @@ var UIController = (function(){
         });
         //This enables event bubbling
         document.querySelector(DOM.container).addEventListener("click",ctrlDeleteItem);
+        document.querySelector(DOM.inputType).addEventListener("change",UICtrl.changeType);
+
     };
 
     var updatePercentages = function(){
